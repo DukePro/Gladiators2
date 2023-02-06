@@ -18,6 +18,7 @@
         private const string MenuGladiator2 = "2";
         private const string MenuGladiator3 = "3";
         private const string MenuGladiator4 = "4";
+        private const string MenuGladiator5 = "5";
         private const string MenuBack = "0";
 
         Arena arena = new Arena();
@@ -25,6 +26,7 @@
         Rouge rouge = new Rouge();
         Knight knight = new Knight();
         Cleric cleric = new Cleric();
+        Doppelganger doppelganger = new Doppelganger();
 
         public void ShowMainMenu()
         {
@@ -67,6 +69,7 @@
                 new Rouge(),
                 new Knight(),
                 new Cleric(),
+                new Doppelganger(),
             };
 
             while (isBack == false)
@@ -80,6 +83,7 @@
                 Console.WriteLine(MenuGladiator2 + " - " + rouge.Name);
                 Console.WriteLine(MenuGladiator3 + " - " + knight.Name);
                 Console.WriteLine(MenuGladiator4 + " - " + cleric.Name);
+                Console.WriteLine(MenuGladiator5 + " - " + doppelganger.Name);
                 Console.WriteLine(MenuBack + " - Назад");
 
                 userInput = Console.ReadLine();
@@ -105,6 +109,10 @@
                         Console.WriteLine("Выбран " + cleric.Name);
                         AddGladiatorToArena(new Cleric());
                         break;
+                    case MenuGladiator5:
+                        Console.WriteLine("Выбран " + doppelganger.Name);
+                        AddGladiatorToArena(new Doppelganger());
+                        break;
 
                     case MenuExit:
                         isBack = true;
@@ -122,9 +130,15 @@
         private void ShowAllGladiators()
         {
             fighter.ShowStats();
+            Console.WriteLine("Сбалансированный боец со случайным начальным уроном, который останется постоянным, каждый удар.");
             rouge.ShowStats();
+            Console.WriteLine("Вор - боец с небольшим базовым уроном, но возможностью нанести критический удар или полностью уклониться от атаки.");
             knight.ShowStats();
+            Console.WriteLine("Рыцарь. Весь в броне и со щитом, которым может воспользоваться в любой момент и увеличить свою броню.");
             cleric.ShowStats();
+            Console.WriteLine("Боевой храмовник. Может вылечить себя после удара.");
+            doppelganger.ShowStats();
+            Console.WriteLine("Странная раздвоенная сущность. Может, как нанести двойной урон, так и разделить полученный между сущностями.");
         }
 
         private void AddGladiatorToArena(Gladiator gladiator)
@@ -139,13 +153,6 @@
 
         public Arena()
         {
-        }
-
-        public void AddGladiators(Gladiator gladiator1, Gladiator gladiator2)
-        {
-            Gladiators.Clear();
-            Gladiators.Add(gladiator1);
-            Gladiators.Add(gladiator2);
         }
 
         public void Fight()
@@ -471,6 +478,74 @@
             }
 
             Console.WriteLine("Получено урона: " + (healthBeforeDamage - _health));
+        }
+    }
+
+    class Doppelganger : Gladiator
+    {
+        public Doppelganger(string name, int health, int hitDamage, int armor) : base(name, health, hitDamage, armor)
+        {
+        }
+
+        public Doppelganger()
+        {
+            Name = "Doppelganger M'aik-M'aik";
+            _health = 1000;
+            _hitDamage = 60;
+            _armor = 15;
+        }
+
+        public override int Damage()
+        {
+            return DoubleHit();
+        }
+
+        private int DoubleHit()
+        {
+            Random random = new Random();
+            double hitMultiplier = 2;
+            int doubleHitChance = 50;
+            int baseDamage = _hitDamage;
+
+            if (random.Next(0, 100) < doubleHitChance)
+            {
+                baseDamage = Convert.ToInt32(Math.Round(baseDamage * hitMultiplier));
+                Console.WriteLine($"Получен двойной удар!");
+            }
+
+            return baseDamage;
+        }
+
+        public override void TakeDamage(int damage)
+        {
+            int healthBeforeDamage = _health;
+            damage = DevidedDamage(damage);
+
+            if (damage <= _armor)
+            {
+                _health -= DevidedDamage(_baseDamage);
+            }
+            else
+            {
+                _health = Math.Max(0, _health - (damage - _armor));
+            }
+
+            Console.WriteLine("Получено урона: " + (healthBeforeDamage - _health));
+        }
+
+        private int DevidedDamage(int damage)
+        {
+            Random random = new Random();
+            int devideDamageChance = 50;
+            int devideDamageBy = 2;
+
+            if (random.Next(0, 100) < devideDamageChance)
+            {
+                damage = damage / devideDamageBy;
+                Console.WriteLine($"Урон разделён между сущностями!");
+            }
+
+            return damage;
         }
     }
 }
